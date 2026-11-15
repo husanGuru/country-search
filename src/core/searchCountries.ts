@@ -1,4 +1,5 @@
 import { HttpError } from './httpError'
+import type { RawCountry } from './types'
 
 const BASE_URL = 'https://countries.dev/name'
 const DEFAULT_TIMEOUT_MS = 10_000
@@ -7,7 +8,7 @@ export async function searchCountries(
   query: string,
   signal: AbortSignal,
   timeoutMs = DEFAULT_TIMEOUT_MS,
-): Promise<unknown[]> {
+): Promise<RawCountry[]> {
   const combinedSignal = AbortSignal.any([
     signal,
     AbortSignal.timeout(timeoutMs),
@@ -25,5 +26,5 @@ export async function searchCountries(
     throw new HttpError(response.status)
   }
 
-  return response.json() as Promise<unknown[]>
+  return response.json() as Promise<RawCountry[]>
 }
