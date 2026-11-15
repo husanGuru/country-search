@@ -9,9 +9,12 @@ import type { RawCountry } from '../src/core/types'
 
 const rawSpain: RawCountry = {
   name: 'Spain',
+  flag: '🇪🇸',
   capital: 'Madrid',
   region: 'Europe',
   population: 47351567,
+  area: 505992,
+  borders: ['AND', 'FRA', 'GIB', 'PRT', 'MAR'],
   flags: {
     png: 'https://flagcdn.com/w320/es.png',
     svg: 'https://flagcdn.com/es.svg',
@@ -19,6 +22,7 @@ const rawSpain: RawCountry = {
   languages: [
     { name: 'Spanish', iso639_1: 'es', iso639_2: 'spa', nativeName: 'Español' },
   ],
+  currencies: [{ code: 'EUR', name: 'Euro', symbol: '€' }],
 }
 
 function setup(
