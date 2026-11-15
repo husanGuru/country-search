@@ -71,4 +71,22 @@ describe('debounce', () => {
 
     expect(fn).toHaveBeenCalledTimes(2)
   })
+
+  it('cancel() prevents a pending call from running', () => {
+    const fn = vi.fn()
+    const debounced = debounce(fn, delay)
+
+    debounced()
+    debounced.cancel()
+    vi.advanceTimersByTime(delay)
+
+    expect(fn).not.toHaveBeenCalled()
+  })
+
+  it('cancel() on an already-idle debounced function is a no-op', () => {
+    const fn = vi.fn()
+    const debounced = debounce(fn, delay)
+
+    expect(() => debounced.cancel()).not.toThrow()
+  })
 })

@@ -1,10 +1,13 @@
 import './style.css'
 import { createCountrySearch, type SearchState } from './core/countrySearch'
 import { searchCountries } from './core/searchCountries'
+import { createCachingSearch } from './core/createCachingSearch'
+import { addToHistory, loadHistory, saveHistory } from './core/searchHistory'
 import type { ErrorKind } from './core/classifyError'
 import type { Country } from './core/types'
 import { createCountryCard } from './ui/countryCard'
 import { createCountryDetail } from './ui/countryDetail'
+import { createHistoryList } from './ui/searchHistory'
 
 const SEARCH_DELAY_MS = 400
 
@@ -23,9 +26,34 @@ status.className = 'status'
 status.hidden = true
 app.append(status)
 
+const historyContainer = document.createElement('div')
+historyContainer.className = 'history-container'
+app.append(historyContainer)
+
 const resultsList = document.createElement('ul')
 resultsList.className = 'results'
 app.append(resultsList)
+
+let history = loadHistory(localStorage)
+let currentQuery = ''
+
+function renderHistory() {
+  historyContainer.replaceChildren(
+    createHistoryList(history, selectFromHistory),
+  )
+}
+
+function recordHistory(query: string) {
+  history = addToHistory(history, query)
+  saveHistory(history, localStorage)
+  renderHistory()
+}
+
+function selectFromHistory(query: string) {
+  input.value = query
+  currentQuery = query
+  countrySearch.searchNow(query)
+}
 
 function clearResults() {
   resultsList.replaceChildren()
@@ -98,10 +126,12 @@ function render(state: SearchState) {
           createCountryCard(country, openDetail),
         ),
       )
+      recordHistory(currentQuery)
       break
     case 'not-found':
       clearResults()
       showStatus('No countries found.', 'not-found')
+      recordHistory(currentQuery)
       break
     case 'error':
       clearResults()
@@ -110,12 +140,17 @@ function render(state: SearchState) {
   }
 }
 
+const cachedSearch = createCachingSearch(searchCountries)
+
 const countrySearch = createCountrySearch(
-  { search: searchCountries },
+  { search: cachedSearch },
   render,
   SEARCH_DELAY_MS,
 )
 
+renderHistory()
+
 input.addEventListener('input', () => {
+  currentQuery = input.value
   countrySearch.search(input.value)
 })

@@ -117,4 +117,34 @@ describe('createCountrySearch', () => {
 
     expect(search).toHaveBeenCalledWith('spain', expect.any(AbortSignal))
   })
+
+  it('searchNow skips the debounce delay entirely', async () => {
+    const search = vi.fn().mockResolvedValue([rawSpain])
+    const { searchNow, states } = setup(search)
+
+    searchNow('spain')
+
+    expect(search).toHaveBeenCalledWith('spain', expect.any(AbortSignal))
+    expect(states).toEqual([{ status: 'loading' }])
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(states.at(-1)).toEqual({
+      status: 'results',
+      countries: [mapCountryResponse(rawSpain)],
+    })
+  })
+
+  it('searchNow also cancels whatever debounced search was still pending', async () => {
+    const search = vi.fn().mockResolvedValue([rawSpain])
+    const { search: run, searchNow } = setup(search)
+
+    run('sp')
+    searchNow('spain')
+
+    await vi.advanceTimersByTimeAsync(500)
+
+    expect(search).toHaveBeenCalledTimes(1)
+    expect(search).toHaveBeenCalledWith('spain', expect.any(AbortSignal))
+  })
 })

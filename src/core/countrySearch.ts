@@ -50,22 +50,37 @@ export function createCountrySearch(
 
   const debouncedRunSearch = debounce(runSearch, delay)
 
-  function runCountrySearch(query: string) {
+  function cancelPending(query: string) {
     lastQuery = query
     controller?.abort()
 
     if (query.trim() === '') {
       onStateChange({ status: 'idle' })
-      return
+      return undefined
     }
 
     controller = new AbortController()
-    debouncedRunSearch(query, controller.signal)
+    return controller
+  }
+
+  function runCountrySearch(query: string) {
+    const next = cancelPending(query)
+    if (next) {
+      debouncedRunSearch(query, next.signal)
+    }
+  }
+
+  function searchNow(query: string) {
+    const next = cancelPending(query)
+    debouncedRunSearch.cancel()
+    if (next) {
+      void runSearch(query, next.signal)
+    }
   }
 
   function retry() {
     runCountrySearch(lastQuery)
   }
 
-  return { search: runCountrySearch, retry }
+  return { search: runCountrySearch, searchNow, retry }
 }

@@ -51,6 +51,34 @@ body {
   color: #fecaca;
 }
 
+.history-container:empty {
+  display: none;
+}
+
+.history {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.history__item {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.history__item:hover,
+.history__item:focus-visible {
+  outline: 2px solid #38bdf8;
+}
+
 .results {
   list-style: none;
   margin: 1rem 0 0;
